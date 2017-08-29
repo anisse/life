@@ -31,3 +31,17 @@ func TestCycleStartStop(t *testing.T) {
 		t.Fatal("unexpected", err)
 	}
 }
+
+func TestCycleStartWait(t *testing.T) {
+	var lc Cycle
+	lc.Start(func(stop <-chan struct{}) error {
+		<-stop
+		return nil
+	})
+
+	time.AfterFunc(100*time.Millisecond, lc.Stop)
+
+	if err := lc.Wait(); err != nil {
+		t.Fatal("unexpected", err)
+	}
+}

@@ -3,6 +3,7 @@ package life_test
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/pkg/life"
 )
@@ -24,5 +25,35 @@ func ExampleCycle_Start() {
 	err := lc.Wait()
 	if err != nil {
 		fmt.Println(err)
+	}
+}
+
+func ExampleCycle_Stop() {
+	var lc life.Cycle
+	lc.Start(func(stop <-chan struct{}) error {
+		select {
+		case <-stop:
+			return nil
+		case <-time.After(100 * time.Millisecond):
+		}
+		return errors.New("timeout")
+	})
+	lc.Stop()
+	if err := lc.Wait(); err != nil {
+		fmt.Println(err)
+	}
+}
+
+func ExampleCycle_Wait() {
+	var lc Cycle
+	lc.Start(func(stop <-chan struct{}) error {
+		<-stop
+		return nil
+	})
+
+	time.AfterFunc(100*time.Millisecond, lc.Stop)
+
+	if err := lc.Wait(); err != nil {
+		t.Fatal("unexpected", err)
 	}
 }
