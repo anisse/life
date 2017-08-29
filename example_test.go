@@ -45,7 +45,7 @@ func ExampleCycle_Stop() {
 }
 
 func ExampleCycle_Wait() {
-	var lc Cycle
+	var lc life.Cycle
 	lc.Start(func(stop <-chan struct{}) error {
 		<-stop
 		return nil
@@ -54,6 +54,6 @@ func ExampleCycle_Wait() {
 	time.AfterFunc(100*time.Millisecond, lc.Stop)
 
 	if err := lc.Wait(); err != nil {
-		t.Fatal("unexpected", err)
+		fmt.Println(err)
 	}
 }
