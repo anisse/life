@@ -1,9 +1,11 @@
-// Package life manages the lifecycle of a set of goroutines, and their associated resources.
+// Package life manages the lifecycle of a set of goroutines.
+// life draws strong inspiration from gopkg.in/tomb.v1 from Gustavo Niemeyer
+// and github.com/oklog/oklog/pkg/group from Peter Bourgon.
 package life
 
 import "sync"
 
-// A Cycle tracks the lifecycle of one or more goroutines
+// A Cycle tracks the lifecycle of one or more goroutines.
 type Cycle struct {
 	wg sync.WaitGroup
 	mu sync.Mutex // protects following fields
@@ -12,7 +14,8 @@ type Cycle struct {
 	errc  chan error
 }
 
-func (lc *Cycle) Start(fn func(<-chan struct{}) error) {
+// Start starts fn in a new goroutine.
+func (lc *Cycle) Start(fn func(stop <-chan struct{}) error) {
 	lc.mu.Lock()
 	if lc.errc == nil {
 		lc.errc = make(chan error, 1)
@@ -35,6 +38,8 @@ func (lc *Cycle) Start(fn func(<-chan struct{}) error) {
 	}()
 }
 
+// Stop signals to each function started by Start to exit by closing
+// its respective stop channel then returns immediately.
 func (lc *Cycle) Stop() {
 	lc.mu.Lock()
 	for _, g := range lc.procs {
@@ -43,6 +48,10 @@ func (lc *Cycle) Stop() {
 	lc.mu.Unlock()
 }
 
+// Wait waits until all functions passed to Start have exited.
+// If any function returns an error, that error is propgated back to
+// the caller of Wait. Subsiquent errors are discared.
+// If Start or Stop is called after Wait, they will panic.
 func (lc *Cycle) Wait() error {
 	lc.wg.Wait()
 	close(lc.errc)
