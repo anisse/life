@@ -1,4 +1,5 @@
 language: go
+dist: trusty
 go_import_path: github.com/pkg/life
 go:
   - 1.8.x
