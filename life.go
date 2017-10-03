@@ -49,8 +49,8 @@ func (lc *Cycle) Stop() {
 }
 
 // Wait waits until all functions passed to Start have exited.
-// If any function returns an error, that error is propgated back to
-// the caller of Wait. Subsiquent errors are discared.
+// If any function returns an error, that error is propagated back to
+// the caller of Wait. Subsequent errors are discared.
 // If Start or Stop is called after Wait, they will panic.
 func (lc *Cycle) Wait() error {
 	lc.wg.Wait()
